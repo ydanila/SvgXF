@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using System.Xml;
 using SkiaSharp;
 using SkiaSharp.Views.Forms;
 using Xamarin.Forms;
@@ -69,7 +70,7 @@ namespace SvgXF.Lib
 					continue;
 			    }
 
-				var name = Parse(assembly.FullName);
+				var name = ParseAssemblyFullName(assembly.FullName);
 			    //	ignore .net assemblies
 			    if(name.Item2.Equals("7cec85d7bea7798e"))
 			    {
@@ -88,7 +89,7 @@ namespace SvgXF.Lib
 		    return null;
 	    }
 
-	    private (string, string) Parse(string assemblyFullName)
+	    private (string, string) ParseAssemblyFullName(string assemblyFullName)
 	    {
 		    var parts = assemblyFullName.Split(',')
 			    .Select(x => x.Trim())
@@ -120,13 +121,24 @@ namespace SvgXF.Lib
 		        return;
 	        }
 
-	        var assembly = m_baseAssembly ?? GetType().Assembly;
-			using (var stream = assembly.GetManifestResourceStream(ResourceId))
+	        //	use entry if not found
+	        var assembly = m_baseAssembly ?? Assembly.GetEntryAssembly();
+	        var resId = BuildResourceId(assembly.FullName, ResourceId);
+			using (var stream = assembly.GetManifestResourceStream(resId))
             {
-                var svg = new SkiaSharp.Extended.Svg.SKSvg();
-                svg.Load(stream);
+	            if (stream == null)
+	            {
+					throw new Exception($"Resource \'{resId}\' not found");
+	            }
 
-                SKImageInfo info = args.Info;
+                var svg = new SkiaSharp.Extended.Svg.SKSvg();
+				var settings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
+	            using(var reader = XmlReader.Create(stream, settings))
+	            {
+		            svg.Load(reader);
+	            }
+
+				SKImageInfo info = args.Info;
                 canvas.Translate(info.Width / 2f, info.Height / 2f);
 
                 SKRect bounds = svg.ViewBox;
@@ -142,6 +154,22 @@ namespace SvgXF.Lib
             }
         }
 
-        #endregion
+	    private string BuildResourceId(string assemblyFullName, string resourceId)
+	    {
+		    if (!string.IsNullOrEmpty(resourceId))
+		    {
+			    resourceId = resourceId.Replace('/', '.').Replace('\\', '.');
+		    }
+
+		    var parseResult = ParseAssemblyFullName(assemblyFullName);
+		    if (string.IsNullOrEmpty(parseResult.Item1))
+		    {
+			    return resourceId;
+		    }
+
+		    return $"{parseResult.Item1}.{resourceId}";
+	    }
+
+	    #endregion
     }
 }
