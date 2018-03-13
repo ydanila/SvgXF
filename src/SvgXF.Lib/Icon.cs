@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using SkiaSharp;
 using SkiaSharp.Views.Forms;
@@ -9,48 +11,95 @@ namespace SvgXF.Lib
 {
     public class Icon : Frame
     {
-        #region Private Members
+		#region Bindable Properties
 
-        private readonly SKCanvasView _canvasView = new SKCanvasView();
+		#region ResourceId
 
-        #endregion
-
-        #region Bindable Properties
-
-        #region ResourceId
-
-        public static readonly BindableProperty ResourceIdProperty = BindableProperty.Create(
+		public static readonly BindableProperty ResourceIdProperty = BindableProperty.Create(
             nameof(ResourceId), typeof(string), typeof(Icon), default(string), propertyChanged: RedrawCanvas);
-
-        public string ResourceId
+		
+	    public string ResourceId
         {
             get => (string)GetValue(ResourceIdProperty);
             set => SetValue(ResourceIdProperty, value);
         }
 
-        #endregion
+		#endregion
 
-        #endregion
+		#region Private Members
 
-        #region Constructor
+	    private readonly SKCanvasView m_canvasView = new SKCanvasView();
 
-        public Icon()
+	    private readonly Assembly m_baseAssembly;
+
+	    #endregion
+
+		#endregion
+
+		#region Constructor
+
+		public Icon()
         {
             Padding = new Thickness(0);
             BackgroundColor = Color.Transparent;
             HasShadow = false;
-            Content = _canvasView;
-            _canvasView.PaintSurface += CanvasViewOnPaintSurface;
-        }
+            Content = m_canvasView;
+            m_canvasView.PaintSurface += CanvasViewOnPaintSurface;
+			//	here we will find original Xamarin assembly which has item declaration
+		    m_baseAssembly = FindBaseAssembly();
+	    }
 
-        #endregion
+	    #endregion
 
-        #region Private Methods
+	    private Assembly FindBaseAssembly()
+	    {
+		    var frames = new StackTrace().GetFrames();
 
-        private static void RedrawCanvas(BindableObject bindable, object oldvalue, object newvalue)
+		    var assemblies = (from f in frames
+				    select f.GetMethod().ReflectedType.Assembly)
+			    .Distinct().Skip(1).ToList();
+
+		    foreach(var assembly in assemblies)
+		    {
+			    var name = Parse(assembly.FullName);
+			    //	ignore .net assemblies
+			    if(name.Item2.Equals("7cec85d7bea7798e"))
+			    {
+				    continue;
+			    }
+
+			    //	ignore xamarin lib
+			    if(name.Item1.Equals("Xamarin.Forms.Xaml"))
+			    {
+				    continue;
+			    }
+
+			    return assembly;
+		    }
+
+		    return null;
+	    }
+
+	    private (string, string) Parse(string assemblyFullName)
+	    {
+		    var parts = assemblyFullName.Split(',')
+			    .Select(x => x.Trim())
+			    .ToList();
+
+		    const string versionToken = "PublicKeyToken=";
+
+		    var name = parts[0];
+		    var token = (from p in parts where p.StartsWith(versionToken) select p.Substring(versionToken.Length)).FirstOrDefault();
+
+		    return (name, token ?? "null");
+	    }
+		
+		#region Private Methods
+
+		private static void RedrawCanvas(BindableObject bindable, object oldvalue, object newvalue)
         {
             Icon svgIcon = bindable as Icon;
-            svgIcon?._canvasView.InvalidateSurface();
+            svgIcon?.m_canvasView.InvalidateSurface();
         }
 
         private void CanvasViewOnPaintSurface(object sender, SKPaintSurfaceEventArgs args)
@@ -58,10 +107,13 @@ namespace SvgXF.Lib
             SKCanvas canvas = args.Surface.Canvas;
             canvas.Clear();
 
-            if (string.IsNullOrEmpty(ResourceId))
-                return;
+	        if (string.IsNullOrEmpty(ResourceId))
+	        {
+		        return;
+	        }
 
-            using (Stream stream = GetType().GetTypeInfo().Assembly.GetManifestResourceStream(ResourceId))
+	        var assembly = m_baseAssembly ?? GetType().Assembly;
+			using (var stream = assembly.GetManifestResourceStream(ResourceId))
             {
                 var svg = new SkiaSharp.Extended.Svg.SKSvg();
                 svg.Load(stream);
