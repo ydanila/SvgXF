@@ -54,13 +54,22 @@ namespace SvgXF.Lib
 	    {
 		    var frames = new StackTrace().GetFrames();
 
+			
 		    var assemblies = (from f in frames
 				    select f.GetMethod().ReflectedType.Assembly)
-			    .Distinct().Skip(1).ToList();
+			    .Distinct().ToList();
 
-		    foreach(var assembly in assemblies)
+		    var currentAssemblyName = GetType().Assembly.FullName;
+
+			foreach(var assembly in assemblies)
 		    {
-			    var name = Parse(assembly.FullName);
+				//	skip current assembly
+			    if (assembly.FullName.Equals(currentAssemblyName))
+			    {
+					continue;
+			    }
+
+				var name = Parse(assembly.FullName);
 			    //	ignore .net assemblies
 			    if(name.Item2.Equals("7cec85d7bea7798e"))
 			    {
