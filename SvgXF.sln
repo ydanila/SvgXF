@@ -3,13 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27130.2024
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SvgXF.Android", "SvgXF\SvgXF.Android\SvgXF.Android.csproj", "{270243AD-AF17-4A00-A1F8-24EC4F199FAF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SvgXF.Android", "src\SvgXF.Android\SvgXF.Android.csproj", "{270243AD-AF17-4A00-A1F8-24EC4F199FAF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SvgXF.iOS", "SvgXF\SvgXF.iOS\SvgXF.iOS.csproj", "{504BD4F8-3A8D-4C67-9C6E-11AC0F6E0C16}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SvgXF.iOS", "src\SvgXF.iOS\SvgXF.iOS.csproj", "{504BD4F8-3A8D-4C67-9C6E-11AC0F6E0C16}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SvgXF.UWP", "SvgXF\SvgXF.UWP\SvgXF.UWP.csproj", "{B5FC4714-DEB1-42B3-9E20-1740CDCBB187}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SvgXF.UWP", "src\SvgXF.UWP\SvgXF.UWP.csproj", "{B5FC4714-DEB1-42B3-9E20-1740CDCBB187}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SvgXF", "SvgXF\SvgXF\SvgXF.csproj", "{5AE10A83-F906-43CB-AB1E-FD3CBD868C6B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SvgXF", "src\SvgXF\SvgXF.csproj", "{5AE10A83-F906-43CB-AB1E-FD3CBD868C6B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
