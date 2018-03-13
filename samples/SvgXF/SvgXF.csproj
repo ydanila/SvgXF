@@ -20,7 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SvgXF.Lib\SvgXF.Lib.csproj" />
+    <ProjectReference Include="..\..\src\SvgXF.Lib\SvgXF.Lib.csproj" />
   </ItemGroup>
 
   <ItemGroup>
