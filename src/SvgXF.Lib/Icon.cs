@@ -1,11 +1,11 @@
 ﻿using System;
 using System.IO;
+using System.Reflection;
 using SkiaSharp;
 using SkiaSharp.Views.Forms;
 using Xamarin.Forms;
-using SKSvg = SkiaSharp.Extended.Svg.SKSvg;
 
-namespace SvgXF
+namespace SvgXF.Lib
 {
     public class Icon : Frame
     {
@@ -61,9 +61,9 @@ namespace SvgXF
             if (string.IsNullOrEmpty(ResourceId))
                 return;
 
-            using (Stream stream = GetType().Assembly.GetManifestResourceStream(ResourceId))
+            using (Stream stream = GetType().GetTypeInfo().Assembly.GetManifestResourceStream(ResourceId))
             {
-                SKSvg svg = new SKSvg();
+                var svg = new SkiaSharp.Extended.Svg.SKSvg();
                 svg.Load(stream);
 
                 SKImageInfo info = args.Info;
